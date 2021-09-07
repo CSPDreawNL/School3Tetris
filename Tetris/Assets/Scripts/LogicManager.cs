@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class LogicManager : MonoBehaviour, ILogicManager 
 {
-
 	public enum GameState 
 	{
 		None, PreGame, InPlay, Paused, GameOver
@@ -146,6 +145,8 @@ public class LogicManager : MonoBehaviour, ILogicManager
 	};
 	private int[][,,] allPieces;
 
+	private float falltimer = 0f;
+
 	public Vector2Int GridSize => gridSize;
 	public int[,] FixedPieces { get; private set; }
 	public int[,,] ActivePiece { get; private set; }
@@ -155,7 +156,6 @@ public class LogicManager : MonoBehaviour, ILogicManager
 	public int Level => throw new System.NotImplementedException();
 	public int Score => throw new System.NotImplementedException();
 	
-
 	public Vector2Int GetActivePieceHardDropPosition() 
 	{
 		throw new System.NotImplementedException();
@@ -167,6 +167,8 @@ public class LogicManager : MonoBehaviour, ILogicManager
 	}
 	private void Awake() 
 	{
+		FixedPieces = new int[gridSize.y, gridSize.x];
+
 		allPieces = new int[][,,] 
 		{
 			iPiece,
@@ -177,17 +179,38 @@ public class LogicManager : MonoBehaviour, ILogicManager
 			zPiece,
 			tPiece
 		};
+		ResetGame();
+		ActivePiece = allPieces[1];
 	}
 
 	private void Update() 
 	{
-		// use this for getkeydowns and piece auto fall counter
+		GameUpdate();
+
+		falltimer = falltimer + Time.deltaTime;
+
+		if (Input.GetKeyDown(moveRightKey))
+        {
+			ActivePiecePosition += Vector2Int.right;
+        }
+		if (Input.GetKeyDown(moveLeftKey))
+		{
+			ActivePiecePosition += Vector2Int.left;
+		}
+		if (Input.GetKeyDown(softDropKey) || falltimer >= 1f)
+		{
+			ActivePiecePosition += Vector2Int.down;
+			falltimer = 0f;
+		}
 	}
 
 	private void ResetGame() 
 	{
 		FixedPieces = new int[gridSize.y, gridSize.x];
 		ChangeGameState(GameState.PreGame);
+
+		ActivePiecePosition = ActivePiecePosition + Vector2Int.up * 20;
+		ActivePiecePosition = ActivePiecePosition + Vector2Int.right * 4;
 	}
 
 	private void ChangeGameState(GameState gameState) 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// With help from Boas (3GD2)
+// With help from Boas en Darryl (3GD2)
 
 public class VisualManager : MonoBehaviour 
 {
@@ -45,6 +45,35 @@ public class VisualManager : MonoBehaviour
             for (int x = 0 ; x < logicManager.GridSize.x ; x++)
             {
                 spriteRenderers[y, x].color = pieceColors[logicManager.FixedPieces[y, x]];
+            }
+        }
+
+        //UpdateTileColors();
+        //UpdateGhostPiece();
+        UpdateActivePiece();
+        //UpdatePreviewPiece();
+        //UpdateScore();
+    }
+
+    private void UpdateActivePiece()
+    {
+        if (logicManager.ActivePiece != null)
+        {
+            DrawSinglePiece(logicManager.ActivePiece, logicManager.ActivePiecePosition, logicManager.ActivePieceRotation);
+        }
+    }
+
+    private void DrawSinglePiece(int[,,] piece, Vector2Int piecePosition, int pieceRotation)
+    {
+        Vector2Int pieceSize = new Vector2Int(piece.GetLength(2), piece.GetLength(1));
+        for (int y = 0 ; y < pieceSize.y ; y++)
+        {
+            for (int x = 0 ; x < pieceSize.x ; x++)
+            {
+                if (piece[pieceRotation, y, x] > 0)
+                {
+                    spriteRenderers[piecePosition.y - y + pieceSize.y, piecePosition.x + x].color = pieceColors[piece[pieceRotation, y, x]];
+                }
             }
         }
     }
