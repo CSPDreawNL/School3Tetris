@@ -191,19 +191,17 @@ public class LogicManager : MonoBehaviour, ILogicManager
 
 		if (Input.GetKeyDown(moveRightKey))
         {
-			if (ActivePiecePosition.x == 7)
+			if (!CheckOverlap(ActivePiece, ActivePieceRotation, ActivePiecePosition + Vector2Int.right))
 			{
-				return;
+				ActivePiecePosition += Vector2Int.right;
 			}
-			ActivePiecePosition += Vector2Int.right;
-        }
+		}
 		if (Input.GetKeyDown(moveLeftKey))
 		{
-			if (ActivePiecePosition.x == 0)
-            {
-				return;
-            }
-			ActivePiecePosition += Vector2Int.left;
+			if (!CheckOverlap(ActivePiece, ActivePieceRotation, ActivePiecePosition + Vector2Int.left))
+			{
+				ActivePiecePosition += Vector2Int.left;
+			}
 		}
 		if (Input.GetKeyDown(softDropKey) || fallTimer >= 1f)
 		{
@@ -240,4 +238,24 @@ public class LogicManager : MonoBehaviour, ILogicManager
 	{
 		return new Vector2Int(piece.GetLength(2), piece.GetLength(1));
 	}
+
+	private bool CheckOverlap(int[,,] piece, int pieceRotation, Vector2Int piecePosition)
+	{
+		Vector2Int pieceSize = GetPieceSize(piece);
+		for (int x = 0 ; x < pieceSize.x ; x++)
+		{
+			for (int y = 0 ; y < pieceSize.y ; y++)
+			{
+				if (piece[pieceRotation, y, x] > 0)
+				{
+					if (x + piecePosition.x < 0)
+					{ // check of links buiten arena
+						return true;
+					}
+				}
+			}
+		}
+    return false;
+	}
 }
+
