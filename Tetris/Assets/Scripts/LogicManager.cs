@@ -249,7 +249,11 @@ public class LogicManager : MonoBehaviour, ILogicManager
 				if (piece[pieceRotation, y, x] > 0)
 				{
 					if (x + piecePosition.x < 0)
-					{ // check of links buiten arena
+					{
+						return true;
+					}
+					if (x + 1 + piecePosition.x > GridSize.x)
+					{
 						return true;
 					}
 				}
