@@ -145,7 +145,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
 	};
 	private int[][,,] allPieces;
 
-	private float falltimer = 0f;
+	private float fallTimer = 0f;
 
 	public Vector2Int GridSize => gridSize;
 	public int[,] FixedPieces { get; private set; }
@@ -187,20 +187,32 @@ public class LogicManager : MonoBehaviour, ILogicManager
 	{
 		GameUpdate();
 
-		falltimer = falltimer + Time.deltaTime;
+		fallTimer = fallTimer + Time.deltaTime;
 
 		if (Input.GetKeyDown(moveRightKey))
         {
+			if (ActivePiecePosition.x == 7)
+			{
+				return;
+			}
 			ActivePiecePosition += Vector2Int.right;
         }
 		if (Input.GetKeyDown(moveLeftKey))
 		{
+			if (ActivePiecePosition.x == 0)
+            {
+				return;
+            }
 			ActivePiecePosition += Vector2Int.left;
 		}
-		if (Input.GetKeyDown(softDropKey) || falltimer >= 1f)
+		if (Input.GetKeyDown(softDropKey) || fallTimer >= 1f)
 		{
+			if (ActivePiecePosition.y == 0)
+            {
+				return;
+            }
 			ActivePiecePosition += Vector2Int.down;
-			falltimer = 0f;
+			fallTimer = 0f;
 		}
 	}
 
@@ -211,6 +223,8 @@ public class LogicManager : MonoBehaviour, ILogicManager
 
 		ActivePiecePosition = ActivePiecePosition + Vector2Int.up * 20;
 		ActivePiecePosition = ActivePiecePosition + Vector2Int.right * 4;
+
+		ChangeGameState(GameState.InPlay);
 	}
 
 	private void ChangeGameState(GameState gameState) 
