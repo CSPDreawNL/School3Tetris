@@ -48,7 +48,7 @@ public class VisualManager : MonoBehaviour
             }
         }
 
-        //UpdateTileColors();
+        UpdateTileColors();
         //UpdateGhostPiece();
         UpdateActivePiece();
         //UpdatePreviewPiece();
@@ -61,6 +61,11 @@ public class VisualManager : MonoBehaviour
         {
             DrawSinglePiece(logicManager.ActivePiece, logicManager.ActivePiecePosition, logicManager.ActivePieceRotation);
         }
+    }
+
+    private void UpdateTileColors()
+    {
+
     }
 
     private void DrawSinglePiece(int[,,] piece, Vector2Int piecePosition, int pieceRotation)

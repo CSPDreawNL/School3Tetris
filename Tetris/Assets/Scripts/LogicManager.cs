@@ -165,6 +165,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
 	{
 		throw new System.NotImplementedException();
 	}
+
 	private void Awake() 
 	{
 		FixedPieces = new int[gridSize.y, gridSize.x];
@@ -205,11 +206,10 @@ public class LogicManager : MonoBehaviour, ILogicManager
 		}
 		if (Input.GetKeyDown(softDropKey) || fallTimer >= 1f)
 		{
-			if (ActivePiecePosition.y == 0)
-            {
-				return;
-            }
-			ActivePiecePosition += Vector2Int.down;
+			if (!CheckOverlap(ActivePiece, ActivePieceRotation, ActivePiecePosition + Vector2Int.down))
+			{
+				ActivePiecePosition += Vector2Int.down;
+			}
 			fallTimer = 0f;
 		}
 	}
@@ -221,8 +221,6 @@ public class LogicManager : MonoBehaviour, ILogicManager
 
 		ActivePiecePosition = ActivePiecePosition + Vector2Int.up * 20;
 		ActivePiecePosition = ActivePiecePosition + Vector2Int.right * 4;
-
-		ChangeGameState(GameState.InPlay);
 	}
 
 	private void ChangeGameState(GameState gameState) 
@@ -256,6 +254,14 @@ public class LogicManager : MonoBehaviour, ILogicManager
 					{
 						return true;
 					}
+					if (y + piecePosition.y < y)
+					{
+						return true;
+					}
+					//if (y + piecePosition.y < y)
+					//{
+					//	return true;
+					//}
 				}
 			}
 		}
