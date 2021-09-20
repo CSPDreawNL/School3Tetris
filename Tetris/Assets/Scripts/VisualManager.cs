@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// With help from Boas en Darryl (3GD2)
+// With help from Boas, Justin, and Darryl (3GD2)
 
 public class VisualManager : MonoBehaviour 
 {
