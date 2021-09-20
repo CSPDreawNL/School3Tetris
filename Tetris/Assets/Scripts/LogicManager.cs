@@ -144,8 +144,13 @@ public class LogicManager : MonoBehaviour, ILogicManager
         }
     };
     private int[][,,] allPieces;
-
+    private List<int> randomBag;
+    private float maxFallTimer = 1f;
     private float fallTimer = 0f;
+    private int oneLineClear = 100;
+    private int twoLineClear = 200;
+    private int threeLineClear = 400;
+    private int fourLineClear = 800;
 
     public Vector2Int GridSize => gridSize;
     public int[,] FixedPieces { get; private set; }
@@ -166,6 +171,70 @@ public class LogicManager : MonoBehaviour, ILogicManager
         throw new System.NotImplementedException();
     }
 
+    private void RandomizeNewBag()
+    {
+        List<int> options = new List<int>() { 0, 1, 2, 3, 4, 5, 6 };
+        randomBag = new List<int>();
+        for (int i = 0 ; i < allPieces.Length ; i++)
+        {
+            int random = Random.Range(0, options.Count);
+            randomBag.Add(options[random]);
+            options.RemoveAt(random);
+        }
+    }
+
+    private void UpdateLevel()
+    {
+        if (Level == 1)
+        {
+            maxFallTimer = 1f;
+            oneLineClear = 100;
+            twoLineClear = 200;
+            threeLineClear = 400;
+            fourLineClear = 800;
+}
+        if (Level == 2)
+        {
+            maxFallTimer = 0.9f;
+            oneLineClear = 100;
+            twoLineClear = 200;
+            threeLineClear = 400;
+            fourLineClear = 800;
+        }
+        if (Level == 3)
+        {
+            maxFallTimer = 0.8f;
+            oneLineClear = 200;
+            twoLineClear = 400;
+            threeLineClear = 800;
+            fourLineClear = 1600;
+        }
+        if (Level == 4)
+        {
+            maxFallTimer = 0.7f;
+            oneLineClear = 400;
+            twoLineClear = 800;
+            threeLineClear = 1600;
+            fourLineClear = 3200;
+        }
+        if (Level == 5)
+        {
+            maxFallTimer = 0.6f;
+            oneLineClear = 800;
+            twoLineClear = 1600;
+            threeLineClear = 3200;
+            fourLineClear = 6400;
+        }
+        if (Level == 6)
+        {
+            maxFallTimer = 0.6f;
+            oneLineClear = 1600;
+            twoLineClear = 3200;
+            threeLineClear = 6400;
+            fourLineClear = 12800;
+        }
+    }
+
     private void Awake()
     {
         FixedPieces = new int[gridSize.y, gridSize.x];
@@ -181,7 +250,9 @@ public class LogicManager : MonoBehaviour, ILogicManager
             tPiece
         };
         ResetGame();
-        ActivePiece = allPieces[1];
+        RandomizeNewBag();
+        ActivePiece = allPieces[randomBag[0]];
+        randomBag.RemoveAt(0);
     }
 
     private void Update()
@@ -204,7 +275,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
                 GameUpdate?.Invoke();
             }
         }
-        if (Input.GetKeyDown(softDropKey) || fallTimer >= 1f)
+        if (Input.GetKeyDown(softDropKey) || fallTimer >= maxFallTimer)
         {
             if (!CheckOverlap(ActivePiece, ActivePieceRotation, ActivePiecePosition + Vector2Int.down))
             {
@@ -214,6 +285,14 @@ public class LogicManager : MonoBehaviour, ILogicManager
             else
             {
                 PlacePieceOnGrid(ActivePiece, ActivePiecePosition, ActivePieceRotation);
+                ActivePiece = allPieces[randomBag[0]];
+                randomBag.RemoveAt(0);
+                if (randomBag.Count == 0)
+                {
+                    RandomizeNewBag();
+                }
+                ActivePiecePosition = new Vector2Int(4, 20);
+                ActivePieceRotation = 0;
             }
             fallTimer = 0f;
         }
@@ -239,8 +318,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
         FixedPieces = new int[gridSize.y, gridSize.x];
         ChangeGameState(GameState.PreGame);
 
-        ActivePiecePosition = ActivePiecePosition + Vector2Int.up * 20;
-        ActivePiecePosition = ActivePiecePosition + Vector2Int.right * 4;
+        ActivePiecePosition = new Vector2Int(4, 20);
     }
 
     private void ChangeGameState(GameState gameState)
@@ -314,4 +392,3 @@ public class LogicManager : MonoBehaviour, ILogicManager
         }
     }
 }
-
