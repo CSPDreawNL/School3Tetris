@@ -145,8 +145,8 @@ public class LogicManager : MonoBehaviour, ILogicManager
     };
     private int[][,,] allPieces;
     private List<int> randomBag;
-    private float maxFallTimer = 1f;
     private float fallTimer = 0f;
+    private float maxFallTimer = 1f;
     private int oneLineClear = 100;
     private int twoLineClear = 200;
     private int threeLineClear = 400;
@@ -158,7 +158,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
     public Vector2Int ActivePiecePosition { get; private set; }
     public int ActivePieceRotation { get; private set; }
     public GameState CurrentGameState { get; private set; }
-    public int Level { get; private set; }
+    public int currentLevel { get; private set; }
     public int Score { get; private set; }
 
     public Vector2Int GetActivePieceHardDropPosition()
@@ -174,7 +174,6 @@ public class LogicManager : MonoBehaviour, ILogicManager
     private void RandomizeNewBag()
     {
         List<int> options = new List<int>() { 0, 1, 2, 3, 4, 5, 6 };
-        randomBag = new List<int>();
         for (int i = 0 ; i < allPieces.Length ; i++)
         {
             int random = Random.Range(0, options.Count);
@@ -185,7 +184,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
 
     private void UpdateLevel()
     {
-        if (Level == 1)
+        if (currentLevel == 1)
         {
             maxFallTimer = 1f;
             oneLineClear = 100;
@@ -193,7 +192,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
             threeLineClear = 400;
             fourLineClear = 800;
 }
-        if (Level == 2)
+        if (currentLevel == 2)
         {
             maxFallTimer = 0.9f;
             oneLineClear = 100;
@@ -201,7 +200,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
             threeLineClear = 400;
             fourLineClear = 800;
         }
-        if (Level == 3)
+        if (currentLevel == 3)
         {
             maxFallTimer = 0.8f;
             oneLineClear = 200;
@@ -209,7 +208,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
             threeLineClear = 800;
             fourLineClear = 1600;
         }
-        if (Level == 4)
+        if (currentLevel == 4)
         {
             maxFallTimer = 0.7f;
             oneLineClear = 400;
@@ -217,7 +216,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
             threeLineClear = 1600;
             fourLineClear = 3200;
         }
-        if (Level == 5)
+        if (currentLevel == 5)
         {
             maxFallTimer = 0.6f;
             oneLineClear = 800;
@@ -225,7 +224,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
             threeLineClear = 3200;
             fourLineClear = 6400;
         }
-        if (Level == 6)
+        if (currentLevel == 6)
         {
             maxFallTimer = 0.6f;
             oneLineClear = 1600;
@@ -238,7 +237,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
     private void Awake()
     {
         FixedPieces = new int[gridSize.y, gridSize.x];
-
+        randomBag = new List<int>();
         allPieces = new int[][,,]
         {
             iPiece,
@@ -298,7 +297,6 @@ public class LogicManager : MonoBehaviour, ILogicManager
         }
         if (Input.GetKeyDown(rotateKey))
         {
-            Debug.Log("1");
             int nextPieceRotation = ActivePieceRotation + 1;
             if (nextPieceRotation >= ActivePiece.GetLength(0))
             {
@@ -306,7 +304,6 @@ public class LogicManager : MonoBehaviour, ILogicManager
             }
             if (!CheckOverlap(ActivePiece, nextPieceRotation, ActivePiecePosition))
             {
-                Debug.Log("2");
                 ActivePieceRotation = nextPieceRotation;
                 GameUpdate?.Invoke();
             }
@@ -317,8 +314,9 @@ public class LogicManager : MonoBehaviour, ILogicManager
     {
         FixedPieces = new int[gridSize.y, gridSize.x];
         ChangeGameState(GameState.PreGame);
-
+        currentLevel = 1;
         ActivePiecePosition = new Vector2Int(4, 20);
+        randomBag.Clear();
     }
 
     private void ChangeGameState(GameState gameState)

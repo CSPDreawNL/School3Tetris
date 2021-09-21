@@ -44,7 +44,7 @@ public interface ILogicManager
     /// Returns the current game state.
     /// </summary>
     
-    int Level { get; }
+    int currentLevel { get; }
     /// <summary>
     /// Returns the level the game is currently on, higher level should mean faster automatic soft drops.
     /// </summary>
