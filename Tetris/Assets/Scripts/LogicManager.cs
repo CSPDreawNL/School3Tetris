@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// With help from Boas, Justin, Celine and Darryl (3GD2)
+
 public class LogicManager : MonoBehaviour, ILogicManager
 {
     public enum GameState
@@ -182,6 +184,37 @@ public class LogicManager : MonoBehaviour, ILogicManager
         }
     }
 
+    private void CheckRows()
+    {
+        int _combo = 0; // used for combo's of multiple rows
+        for (int y = 0 ; y < GridSize.y ; y++)
+        {
+            int _fullRow = 0;
+            for (int x = 0 ; x < GridSize.x ; x++)
+            {
+                if (FixedPieces[y, x] > 0)
+                    _fullRow++;
+
+                if (_fullRow == GridSize.x)
+                {
+                    // move every other row one down
+                    for (int gridY = y ; gridY < GridSize.y ; gridY++)
+                    {
+                        for (int gridX = 0 ; gridX < GridSize.x ; gridX++)
+                        {
+                            if (gridY + 1 < GridSize.y)
+                                FixedPieces[gridY, gridX] = FixedPieces[gridY + 1, gridX];
+                        }
+                        GameUpdate?.Invoke();
+                    }
+                    _combo++;
+
+                    y--;
+                }
+            }
+        }
+    } // made by Justin
+
     private void UpdateLevel()
     {
         if (currentLevel == 1)
@@ -191,7 +224,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
             twoLineClear = 200;
             threeLineClear = 400;
             fourLineClear = 800;
-}
+        }
         if (currentLevel == 2)
         {
             maxFallTimer = 0.9f;
@@ -256,67 +289,96 @@ public class LogicManager : MonoBehaviour, ILogicManager
 
     private void Update()
     {
-        fallTimer = fallTimer + Time.deltaTime;
+        if (CurrentGameState == GameState.InPlay)
+        {
 
-        if (Input.GetKeyDown(moveRightKey))
-        {
-            if (!CheckOverlap(ActivePiece, ActivePieceRotation, ActivePiecePosition + Vector2Int.right))
+            fallTimer = fallTimer + Time.deltaTime;
+
+            if (Input.GetKeyDown(moveRightKey))
             {
-                ActivePiecePosition += Vector2Int.right;
-                GameUpdate?.Invoke();
-            }
-        }
-        if (Input.GetKeyDown(moveLeftKey))
-        {
-            if (!CheckOverlap(ActivePiece, ActivePieceRotation, ActivePiecePosition + Vector2Int.left))
-            {
-                ActivePiecePosition += Vector2Int.left;
-                GameUpdate?.Invoke();
-            }
-        }
-        if (Input.GetKeyDown(softDropKey) || fallTimer >= maxFallTimer)
-        {
-            if (!CheckOverlap(ActivePiece, ActivePieceRotation, ActivePiecePosition + Vector2Int.down))
-            {
-                ActivePiecePosition += Vector2Int.down;
-                GameUpdate?.Invoke();
-            }
-            else
-            {
-                PlacePieceOnGrid(ActivePiece, ActivePiecePosition, ActivePieceRotation);
-                ActivePiece = allPieces[randomBag[0]];
-                randomBag.RemoveAt(0);
-                if (randomBag.Count == 0)
+                if (!CheckOverlap(ActivePiece, ActivePieceRotation, ActivePiecePosition + Vector2Int.right))
                 {
-                    RandomizeNewBag();
+                    ActivePiecePosition += Vector2Int.right;
+                    GameUpdate?.Invoke();
                 }
-                ActivePiecePosition = new Vector2Int(4, 20);
-                ActivePieceRotation = 0;
             }
-            fallTimer = 0f;
+            if (Input.GetKeyDown(moveLeftKey))
+            {
+                if (!CheckOverlap(ActivePiece, ActivePieceRotation, ActivePiecePosition + Vector2Int.left))
+                {
+                    ActivePiecePosition += Vector2Int.left;
+                    GameUpdate?.Invoke();
+                }
+            }
+            if (Input.GetKeyDown(softDropKey) || fallTimer >= maxFallTimer)
+            {
+                if (!CheckOverlap(ActivePiece, ActivePieceRotation, ActivePiecePosition + Vector2Int.down))
+                {
+                    ActivePiecePosition += Vector2Int.down;
+                    GameUpdate?.Invoke();
+                }
+                else
+                {
+                    PlacePieceOnGrid(ActivePiece, ActivePiecePosition, ActivePieceRotation);
+                    ActivePiece = allPieces[randomBag[0]];
+                    randomBag.RemoveAt(0);
+                    if (randomBag.Count == 0)
+                    {
+                        RandomizeNewBag();
+                    }
+                    ActivePiecePosition = new Vector2Int(4, 20);
+                    ActivePieceRotation = 0;
+                    if (CheckOverlap(ActivePiece, ActivePieceRotation, ActivePiecePosition))
+                    {
+                        ChangeGameState(GameState.GameOver);
+                    }
+                }
+                fallTimer = 0f;
+            }
+            if (Input.GetKeyDown(rotateKey))
+            {
+                int nextPieceRotation = ActivePieceRotation + 1;
+                if (nextPieceRotation >= ActivePiece.GetLength(0))
+                {
+                    nextPieceRotation = 0;
+                }
+                if (!CheckOverlap(ActivePiece, nextPieceRotation, ActivePiecePosition))
+                {
+                    ActivePieceRotation = nextPieceRotation;
+                    GameUpdate?.Invoke();
+                }
+            }
+            if (Input.GetKeyDown(pauseGameKey))
+            {
+                ChangeGameState(GameState.Paused);
+            }
         }
-        if (Input.GetKeyDown(rotateKey))
+        else if (Input.GetKeyDown(pauseGameKey) && CurrentGameState == GameState.Paused)
         {
-            int nextPieceRotation = ActivePieceRotation + 1;
-            if (nextPieceRotation >= ActivePiece.GetLength(0))
-            {
-                nextPieceRotation = 0;
-            }
-            if (!CheckOverlap(ActivePiece, nextPieceRotation, ActivePiecePosition))
-            {
-                ActivePieceRotation = nextPieceRotation;
-                GameUpdate?.Invoke();
-            }
+            ChangeGameState(GameState.InPlay);
+
+        }
+        else if (Input.GetKeyDown(startGameKey) && CurrentGameState == GameState.PreGame)
+        {
+            ChangeGameState(GameState.InPlay);
+        }
+        else if (Input.GetKeyDown(startGameKey) && CurrentGameState == GameState.GameOver)
+        {
+            ResetGame();
+            GameUpdate?.Invoke();
+            RandomizeNewBag();
         }
     }
 
     private void ResetGame()
     {
         FixedPieces = new int[gridSize.y, gridSize.x];
-        ChangeGameState(GameState.PreGame);
         currentLevel = 1;
         ActivePiecePosition = new Vector2Int(4, 20);
         randomBag.Clear();
+        Score = 0;
+        currentLevel = 1;
+        ChangeGameState(GameState.PreGame);
     }
 
     private void ChangeGameState(GameState gameState)
@@ -358,6 +420,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
                     {
                         return true;
                     }
+
                 }
             }
         }
@@ -388,5 +451,8 @@ public class LogicManager : MonoBehaviour, ILogicManager
                 }
             }
         }
+        ActivePiece = null;
+        CheckRows();
+        GameUpdate?.Invoke();
     }
 }
