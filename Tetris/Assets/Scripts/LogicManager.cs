@@ -149,10 +149,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
     private List<int> randomBag;
     private float fallTimer = 0f;
     private float maxFallTimer = 1f;
-    private int oneLineClear = 100;
-    private int twoLineClear = 200;
-    private int threeLineClear = 400;
-    private int fourLineClear = 800;
+    private int collectiveRowsCleared;
 
     public Vector2Int GridSize => gridSize;
     public int[,] FixedPieces { get; private set; }
@@ -213,57 +210,42 @@ public class LogicManager : MonoBehaviour, ILogicManager
                 }
             }
         }
-    } // made by Justin
+        UpdateLevel(_combo);
+    } // made mostly by Justin
 
-    private void UpdateLevel()
+    private void UpdateLevel(int currentRowsCleared)
     {
-        if (currentLevel == 1)
+        collectiveRowsCleared += currentRowsCleared;
+
+        if (collectiveRowsCleared >= 0 && collectiveRowsCleared <= 9)
         {
             maxFallTimer = 1f;
-            oneLineClear = 100;
-            twoLineClear = 200;
-            threeLineClear = 400;
-            fourLineClear = 800;
+            currentLevel = 1;
         }
-        if (currentLevel == 2)
-        {
-            maxFallTimer = 0.9f;
-            oneLineClear = 100;
-            twoLineClear = 200;
-            threeLineClear = 400;
-            fourLineClear = 800;
-        }
-        if (currentLevel == 3)
+        if (collectiveRowsCleared >= 10 && collectiveRowsCleared <= 19)
         {
             maxFallTimer = 0.8f;
-            oneLineClear = 200;
-            twoLineClear = 400;
-            threeLineClear = 800;
-            fourLineClear = 1600;
+            currentLevel = 2;
         }
-        if (currentLevel == 4)
-        {
-            maxFallTimer = 0.7f;
-            oneLineClear = 400;
-            twoLineClear = 800;
-            threeLineClear = 1600;
-            fourLineClear = 3200;
-        }
-        if (currentLevel == 5)
+        if (collectiveRowsCleared >= 20 && collectiveRowsCleared <= 29)
         {
             maxFallTimer = 0.6f;
-            oneLineClear = 800;
-            twoLineClear = 1600;
-            threeLineClear = 3200;
-            fourLineClear = 6400;
+            currentLevel = 3;
         }
-        if (currentLevel == 6)
+        if (collectiveRowsCleared >= 30 && collectiveRowsCleared <= 39)
         {
-            maxFallTimer = 0.6f;
-            oneLineClear = 1600;
-            twoLineClear = 3200;
-            threeLineClear = 6400;
-            fourLineClear = 12800;
+            maxFallTimer = 0.4f;
+            currentLevel = 4;
+        }
+        if (collectiveRowsCleared >= 40 && collectiveRowsCleared <= 49)
+        {
+            maxFallTimer = 0.2f;
+            currentLevel = 5;
+        }
+        if (collectiveRowsCleared >= 50)
+        {
+            maxFallTimer = 0.1f;
+            currentLevel = 6;
         }
     }
 
@@ -376,8 +358,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
         currentLevel = 1;
         ActivePiecePosition = new Vector2Int(4, 20);
         randomBag.Clear();
-        Score = 0;
-        currentLevel = 1;
+        collectiveRowsCleared = 0;
         ChangeGameState(GameState.PreGame);
     }
 
