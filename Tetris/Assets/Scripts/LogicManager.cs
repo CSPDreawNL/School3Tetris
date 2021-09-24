@@ -328,7 +328,7 @@ public class LogicManager : MonoBehaviour, ILogicManager
         }
     }
 
-    private Vector2Int GetPieceSize(int[,,] piece)
+    public Vector2Int GetPieceSize(int[,,] piece)
     {
         return new Vector2Int(piece.GetLength(2), piece.GetLength(1));
     }
